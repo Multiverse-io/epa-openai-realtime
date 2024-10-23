@@ -16,12 +16,13 @@ import { useEffect, useRef, useCallback, useState } from 'react';
 import { RealtimeClient } from '@openai/realtime-api-beta';
 import { ItemType } from '@openai/realtime-api-beta/dist/lib/client.js';
 import { WavRecorder, WavStreamPlayer } from '../lib/wavtools/index.js';
-import { instructions } from '../utils/conversation_config.js';
 import { WavRenderer } from '../utils/wav_renderer';
 
 import { X, Edit, Zap, ArrowUp, ArrowDown } from 'react-feather';
 import { Button } from '../components/button/Button';
 import { Map } from '../components/Map';
+
+import { useInstructions } from '../hooks/useInstructions';
 
 import './ConsolePage.scss';
 import {
@@ -292,6 +293,20 @@ export function ConsolePage() {
     }
   }, [realtimeEvents]);
 
+  const [instructionType, setInstructionType] = useState<string>('KSB6');
+
+  // Set instructions
+  useEffect(() => {
+    const client = clientRef.current;
+
+    const { instructions } = useInstructions(instructionType);
+
+    console.log('we are updating instructions: ', instructions);
+
+    // Set instructions
+    client.updateSession({ instructions: instructions });
+  }, [instructionType]);
+
   /**
    * Auto-scroll the conversation logs
    */
@@ -384,8 +399,7 @@ export function ConsolePage() {
     const wavStreamPlayer = wavStreamPlayerRef.current;
     const client = clientRef.current;
 
-    // Set instructions
-    client.updateSession({ instructions: instructions });
+    client.updateSession({ voice: 'alloy' });
     // Set transcription, otherwise we don't get user transcriptions back
     client.updateSession({ input_audio_transcription: { model: 'whisper-1' } });
 
@@ -416,6 +430,34 @@ export function ConsolePage() {
           newKv[key] = value;
           return newKv;
         });
+        return { ok: true };
+      }
+    );
+    client.addTool(
+      {
+        name: 'sets_pass_or_fail_after_every_apprentice_answer',
+        description:
+          'Saves whether user passes or fails KSB based on their response.',
+        parameters: {
+          type: 'object',
+          // tool_choice: "required",
+          properties: {
+            key: {
+              type: 'string',
+              description:
+                'The key of the pass or fail value. Always use lowercase and underscores, no other characters.',
+            },
+            value: {
+              type: 'string',
+              description: 'Value can either be pass or fail',
+            },
+          },
+          required: ['key', 'value'],
+        },
+      },
+      async ({ key, value }: { [key: string]: any }) => {
+        console.log('get hre');
+        localStorage.setItem(key, value);
         return { ok: true };
       }
     );
@@ -605,6 +647,14 @@ export function ConsolePage() {
                   <span className="text-xxs leading-tight font-medium text-[#6F7171]">
                     {isRecording ? 'Stop recording' : 'Record your response'}
                   </span>
+                  {/* <Button
+                    label={instructionType}
+                    onClick={() => {
+                      setInstructionType(
+                        instructionType === 'KSB5' ? 'KSB6' : 'KSB5'
+                      );
+                    }}
+                  /> */}
                 </div>
               )}
               {/* <Button
