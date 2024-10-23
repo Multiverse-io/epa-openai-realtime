@@ -10,8 +10,9 @@
  */
 
 const CUSTOM_INSTRUCTION = `
-  Tell me if I passed all of the criterias, if I did, say PASSED, otherwise NOT_PASSED.
-  Go over the criteria 1, 2, 3, 4, and provide me with a JSON in the following format for each one of them:
+  If I provide an example that answers you question about the KSB,
+  Give me an overall score of the response, tell me if I passed all of the criteria, if I did, say that I passed, otherwise Not Passed.
+  Go over the criteria 1, 2, 3, 4, and give back a JSON in the following format for each one of them:
 
   [{
     criterionName: string,
@@ -32,8 +33,9 @@ const CUSTOM_INSTRUCTION = `
     criterionName: string,
     passed: Boolean,
     reasoning: string,
-  }
-  ]
+  }]
+
+  Do not give me back the criteria responses outside the JSON.
 `;
 
 const LOCAL_RELAY_SERVER_URL: string =
@@ -46,9 +48,7 @@ import { ItemType } from '@openai/realtime-api-beta/dist/lib/client.js';
 import { WavRecorder, WavStreamPlayer } from '../lib/wavtools/index.js';
 import { WavRenderer } from '../utils/wav_renderer';
 
-import { X, Edit, Zap, ArrowUp, ArrowDown } from 'react-feather';
-import { Button } from '../components/button/Button';
-import { Map } from '../components/Map';
+import { X } from 'react-feather';
 
 import { useInstructions } from '../hooks/useInstructions';
 
@@ -58,25 +58,8 @@ import {
   PlayIcon,
   RecordingIcon,
 } from '@multiverse-io/stardust-react';
-import { isJsxOpeningLikeElement } from 'typescript';
 import { useParams } from 'react-router-dom';
-
-/**
- * Type for result from get_weather() function call
- */
-interface Coordinates {
-  lat: number;
-  lng: number;
-  location?: string;
-  temperature?: {
-    value: number;
-    units: string;
-  };
-  wind_speed?: {
-    value: number;
-    units: string;
-  };
-}
+import renderTextWithJsonList from '../utils/renderTextWithJsonList';
 
 /**
  * Type for all event logs
@@ -152,45 +135,6 @@ export function ConsolePage() {
   const [isConnected, setIsConnected] = useState(false);
   const [canPushToTalk, setCanPushToTalk] = useState(true);
   const [isRecording, setIsRecording] = useState(false);
-  const [memoryKv, setMemoryKv] = useState<{ [key: string]: any }>({});
-  const [coords, setCoords] = useState<Coordinates | null>({
-    lat: 37.775593,
-    lng: -122.418137,
-  });
-  const [marker, setMarker] = useState<Coordinates | null>(null);
-
-  /**
-   * Utility for formatting the timing of logs
-   */
-  const formatTime = useCallback((timestamp: string) => {
-    const startTime = startTimeRef.current;
-    const t0 = new Date(startTime).valueOf();
-    const t1 = new Date(timestamp).valueOf();
-    const delta = t1 - t0;
-    const hs = Math.floor(delta / 10) % 100;
-    const s = Math.floor(delta / 1000) % 60;
-    const m = Math.floor(delta / 60_000) % 60;
-    const pad = (n: number) => {
-      let s = n + '';
-      while (s.length < 2) {
-        s = '0' + s;
-      }
-      return s;
-    };
-    return `${pad(m)}:${pad(s)}.${pad(hs)}`;
-  }, []);
-
-  /**
-   * When you click the API key
-   */
-  const resetAPIKey = useCallback(() => {
-    const apiKey = prompt('OpenAI API Key');
-    if (apiKey !== null) {
-      localStorage.clear();
-      localStorage.setItem('tmp::voice_api_key', apiKey);
-      window.location.reload();
-    }
-  }, []);
 
   /**
    * Connect to conversation:
@@ -250,12 +194,6 @@ export function ConsolePage() {
     setIsConnected(false);
     setRealtimeEvents([]);
     setItems([]);
-    setMemoryKv({});
-    setCoords({
-      lat: 37.775593,
-      lng: -122.418137,
-    });
-    setMarker(null);
 
     const client = clientRef.current;
     client.disconnect();
@@ -295,8 +233,6 @@ export function ConsolePage() {
   const stopRecording = async () => {
     setIsRecording(false);
     const client = clientRef.current;
-    const wavRecorder = wavRecorderRef.current;
-    await wavRecorder.pause();
 
     client.sendUserMessageContent([
       {
@@ -304,6 +240,9 @@ export function ConsolePage() {
         text: CUSTOM_INSTRUCTION,
       },
     ]);
+
+    const wavRecorder = wavRecorderRef.current;
+    await wavRecorder.pause();
 
     client.createResponse();
   };
@@ -475,11 +414,6 @@ export function ConsolePage() {
         },
       },
       async ({ key, value }: { [key: string]: any }) => {
-        setMemoryKv((memoryKv) => {
-          const newKv = { ...memoryKv };
-          newKv[key] = value;
-          return newKv;
-        });
         return { ok: true };
       }
     );
@@ -570,7 +504,13 @@ export function ConsolePage() {
           <div className="mb-3">
             <span className="rounded-full border border-gray-100 shadow-sm py-1 px-2 text-s font-medium flex items-center justify-center gap-1 w-fit">
               <RecordingIcon size="small" variant="action" />
-              K5
+              {instructionTypeId}
+            </span>
+          </div>
+          <div className="mb-3">
+            <span className="rounded-full border border-gray-100 shadow-sm py-1 px-2 text-s font-medium flex items-center justify-center gap-1 w-fit">
+              Appears in the following projects:
+              {instructionTypeId}
             </span>
           </div>
         </div>
@@ -619,29 +559,19 @@ export function ConsolePage() {
                       {!conversationItem.formatted.tool &&
                         conversationItem.role === 'assistant' && (
                           <div className="bg-[#E7EAFE] text-xs leading-tight font-regular text-[#212223] p-2 rounded-md w-[600px] mr-auto">
-                            {conversationItem.formatted.transcript ||
-                              conversationItem.formatted.text ||
-                              '(truncated)'}
+                            {renderTextWithJsonList(
+                              conversationItem.formatted.transcript ||
+                                conversationItem.formatted.text ||
+                                '(truncated)'
+                            )}
                           </div>
                         )}
-                      {/* {conversationItem.formatted.file && (
-                        <audio
-                          src={conversationItem.formatted.file.url}
-                          controls
-                        />
-                      )} */}
                     </div>
                   </div>
                 );
               })}
             </div>
             <div className="fixed bottom-5 mx-auto left-[55%]">
-              {/* <Toggle
-              defaultValue={false}
-              labels={['manual', 'vad']}
-              values={['none', 'server_vad']}
-              onChange={(_, value) => changeTurnEndType(value)}
-            /> */}
               {isConnected && canPushToTalk && (
                 <div className="flex flex-col gap-1 w-[200px] items-center">
                   <button
@@ -661,25 +591,8 @@ export function ConsolePage() {
                   <span className="text-xxs leading-tight font-medium text-[#6F7171]">
                     {isRecording ? 'Stop recording' : 'Record your response'}
                   </span>
-                  {/* <Button
-                    label={instructionType}
-                    onClick={() => {
-                      setInstructionType(
-                        instructionType === 'KSB5' ? 'KSB6' : 'KSB5'
-                      );
-                    }}
-                  /> */}
                 </div>
               )}
-              {/* <Button
-                label={isConnected ? 'disconnect' : 'connect'}
-                iconPosition={isConnected ? 'end' : 'start'}
-                icon={isConnected ? X : Zap}
-                buttonStyle={isConnected ? 'regular' : 'action'}
-                onClick={
-                  isConnected ? disconnectConversation : connectConversation
-                }
-              /> */}
             </div>
           </div>
         </div>

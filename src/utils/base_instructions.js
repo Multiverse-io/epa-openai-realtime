@@ -70,19 +70,4 @@ holds quantitative numerical data, with inventory updated daily as well as stori
 to unstructured data, as it is organised, labelled, easy to retrieve and allows for easy sorting
 and filtering of data, which means that the data is more straightforward to analyse and create
 visualisations from.
-
-Would you please ALWAYS go over if the answer met the criterias you are looking for or not, and why. Also say if the answer is
-a passing answer or not.
-
-<output>
-   {
-      pass: Boolean, if the user passed based on the criterias
-      criterias: Array<{
-         name: string,
-         checked: Boolean (tell me if the criteria was met),
-         reasoning: string (why did you do it),
-         quote?: string
-      }>
-   }
-</output>
 `;

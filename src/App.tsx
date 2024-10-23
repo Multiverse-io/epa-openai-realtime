@@ -8,11 +8,8 @@ import {
 import './App.scss';
 import EPAPracticeList from './components/EPAPracticeList';
 import { ksbList } from './utils/ksbList';
-import { ConsolePage } from './pages/ConsolePage';
 
 function App() {
-  // return <ConsolePage />;
-
   return (
     <div data-component="App">
       <Navigation.Root>
