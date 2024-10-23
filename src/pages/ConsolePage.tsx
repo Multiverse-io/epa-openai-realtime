@@ -30,6 +30,8 @@ import {
   PlayIcon,
   RecordingIcon,
 } from '@multiverse-io/stardust-react';
+import { isJsxOpeningLikeElement } from 'typescript';
+import { useParams } from 'react-router-dom';
 
 /**
  * Type for result from get_weather() function call
@@ -293,19 +295,21 @@ export function ConsolePage() {
     }
   }, [realtimeEvents]);
 
-  const [instructionType, setInstructionType] = useState<string>('KSB6');
+  const { id: instructionTypeId } = useParams<{ id: string }>();
 
   // Set instructions
   useEffect(() => {
+    if (!instructionTypeId) return;
+
     const client = clientRef.current;
 
-    const { instructions } = useInstructions(instructionType);
+    const { instructions } = useInstructions(instructionTypeId);
 
     console.log('we are updating instructions: ', instructions);
 
     // Set instructions
     client.updateSession({ instructions: instructions });
-  }, [instructionType]);
+  }, [instructionTypeId]);
 
   /**
    * Auto-scroll the conversation logs

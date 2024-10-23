@@ -7,6 +7,7 @@ import {
   SpeakerIcon,
   StarIcon,
 } from '@multiverse-io/stardust-react';
+import { Link } from 'react-router-dom'; // Import Link
 import PortifolioBanner from '../PortifolioBanner';
 
 export enum practiceStatus {
@@ -41,7 +42,7 @@ const EPAPracticeList = ({ ksbList }: EPAPracticeListProps) => {
           </h2>
         </header>
 
-        <div className="max-w-md">
+        <div className="max-w-xl">
           <ul className="list-none p-0 m-0 flex gap-2 flex-col">
             {ksbList.map((el) => {
               return (
@@ -54,15 +55,17 @@ const EPAPracticeList = ({ ksbList }: EPAPracticeListProps) => {
                     {el.name}
                   </span>
                   <div className="flex items-center gap-1 justify-items-end">
-                    <Button
-                      iconPosition="left"
-                      Icon={<SpeakerIcon size="small" variant="action" />}
-                      variant="tertiary"
-                      className="border border-[#4A5FF7]"
-                      size="small"
-                    >
-                      Start practicing
-                    </Button>
+                    <Link to={`/practice/${el.id}`}>
+                      <Button
+                        iconPosition="left"
+                        Icon={<SpeakerIcon size="small" variant="action" />}
+                        variant="tertiary"
+                        className="border border-[#4A5FF7]"
+                        size="small"
+                      >
+                        Start practicing
+                      </Button>
+                    </Link>
                     <PracticeIcon status={el.status} />
                   </div>
                 </li>

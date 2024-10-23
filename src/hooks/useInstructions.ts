@@ -1,14 +1,14 @@
 import { baseInstructions } from "../utils/base_instructions";
-import { KSB5instructions } from "../utils/KSB5";
-import { KSB6instructions } from "../utils/KSB6";
+import { K5instructions } from "../utils/K5";
+import { B6instructions } from "../utils/B6";
 
 const getInstructions = (instructionType: string) => {
     return [baseInstructions, instructions[instructionType]].join('')
 }
 
 const instructions: Record<string, string> = {
-    KSB5 : KSB5instructions,
-    KSB6 : KSB6instructions,
+    K5 : K5instructions,
+    B6 : B6instructions,
 }
 
 // Hook definition

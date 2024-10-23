@@ -11,7 +11,7 @@ import { ksbList } from './utils/ksbList';
 import { ConsolePage } from './pages/ConsolePage';
 
 function App() {
-  return <ConsolePage />;
+  // return <ConsolePage />;
 
   return (
     <div data-component="App">

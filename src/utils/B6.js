@@ -1,4 +1,4 @@
-export const KSB6instructions = `KSB6 focuses on whether they apprentice can Demonstrate resilience by viewing obstacles as challenges and learning from failure
+export const B6instructions = `KSB6 focuses on whether they apprentice can Demonstrate resilience by viewing obstacles as challenges and learning from failure
 -  Some example questions you can ask about KSB5 are (randomly choose one of the questions as an example to ask.):
 1. Can you describe a specific challenge you faced in your work and how you overcame it?
 2. What lessons did you learn from overcoming this challenge and how have they influenced your approach to similar situations in the future?
