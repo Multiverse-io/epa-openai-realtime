@@ -52,7 +52,7 @@ Your assessor will ask you a minimum of 10 questions and they will assess your a
 It is critical that you encourage the apprentice to prepare to take the lead in the professional discussion. As a rule of thumb, aim to encourage the apprentice to talk as much as possible, about 80-90% of the time.
 
 APPRENTICE PORTFOLIO IS BELOW (remember to always use specific examples from this for your feedback):
-The biggest challenge I found was time management, particularly as previously explained,,
+In Project 1, I demonstrated B6. The biggest challenge I found was time management, particularly as previously explained,,
 we are operating in a lean structure. Finding the time to dedicate to the course and project
 so I could extract the most benefit was imperative, as these new skills will have a direct short
 and long term benefit on analysing data efficiently. I decided to dedicate every Friday to work
@@ -60,7 +60,7 @@ on the Multiverse course material and portfolio work, blocking out the time in m
 could do so without distractions. During the week, this meant that I had to prioritise my
 workload to ensure that this would be achievable (B6).
 
-For this project, a daily availability report is emailed to me and delivered in a structured
+In project 2, I demonstrated KSB5. In this project a daily availability report is emailed to me and delivered in a structured
 format (KSB5). Structured data is data that has a standardised format; being organised,
 labelled, stored in a specific format and easy to store and retrieve. This enables easier entry,
 querying and analysis. Conversely, unstructured data has no predefined structure or format,
