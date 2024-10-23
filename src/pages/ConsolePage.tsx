@@ -16,13 +16,14 @@ import { useEffect, useRef, useCallback, useState } from 'react';
 import { RealtimeClient } from '@openai/realtime-api-beta';
 import { ItemType } from '@openai/realtime-api-beta/dist/lib/client.js';
 import { WavRecorder, WavStreamPlayer } from '../lib/wavtools/index.js';
-import { instructions } from '../utils/conversation_config.js';
 import { WavRenderer } from '../utils/wav_renderer';
 
 import { X, Edit, Zap, ArrowUp, ArrowDown } from 'react-feather';
 import { Button } from '../components/button/Button';
 import { Toggle } from '../components/toggle/Toggle';
 import { Map } from '../components/Map';
+
+import { useInstructions } from '../hooks/useInstructions';
 
 import './ConsolePage.scss';
 import { isJsxOpeningLikeElement } from 'typescript';
@@ -284,6 +285,22 @@ export function ConsolePage() {
     }
   }, [realtimeEvents]);
 
+
+  const [instructionType, setInstructionType] = useState<string>('KSB6')
+
+  // Set instructions
+  useEffect(() => {
+    const client = clientRef.current
+
+    const { instructions } = useInstructions(instructionType)
+
+    console.log('we are updating instructions: ', instructions)
+
+    // Set instructions
+    client.updateSession({ instructions: instructions });
+
+  }, [instructionType])
+
   /**
    * Auto-scroll the conversation logs
    */
@@ -376,8 +393,7 @@ export function ConsolePage() {
     const wavStreamPlayer = wavStreamPlayerRef.current;
     const client = clientRef.current;
 
-    // Set instructions
-    client.updateSession({ instructions: instructions });
+    client.updateSession({ voice: 'alloy'})
     // Set transcription, otherwise we don't get user transcriptions back
     client.updateSession({ input_audio_transcription: { model: 'whisper-1' } });
 
@@ -688,6 +704,10 @@ export function ConsolePage() {
               onClick={
                 isConnected ? disconnectConversation : connectConversation
               }
+            />
+            <Button
+              label={instructionType}
+              onClick={() => { setInstructionType(instructionType === 'KSB5' ? 'KSB6' : 'KSB5') }}
             />
           </div>
         </div>
