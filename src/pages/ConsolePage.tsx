@@ -8,6 +8,34 @@
  * This will also require you to set OPENAI_API_KEY= in a `.env` file
  * You can run it with `npm run relay`, in parallel with `npm start`
  */
+
+const CUSTOM_INSTRUCTION = `
+  Tell me if I passed all of the criterias, if I did, say PASSED, otherwise NOT_PASSED.
+  Go over the criteria 1, 2, 3, 4, and provide me with a JSON in the following format for each one of them:
+
+  [{
+    criterionName: string,
+    passed: Boolean,
+    reasoning: string,
+  },
+  {
+    criterionName: string,
+    passed: Boolean,
+    reasoning: string,
+  },
+  {
+    criterionName: string,
+    passed: Boolean,
+    reasoning: string,
+  },
+  {
+    criterionName: string,
+    passed: Boolean,
+    reasoning: string,
+  }
+  ]
+`;
+
 const LOCAL_RELAY_SERVER_URL: string =
   process.env.REACT_APP_LOCAL_RELAY_SERVER_URL || '';
 
@@ -187,6 +215,12 @@ export function ConsolePage() {
 
     // Connect to realtime API
     await client.connect();
+    client.sendUserMessageContent([
+      {
+        type: 'input_text',
+        text: 'START PLACEHOLDER',
+      },
+    ]);
 
     if (client.getTurnDetectionType() === 'server_vad') {
       await wavRecorder.record((data) => client.appendInputAudio(data.mono));
@@ -203,6 +237,10 @@ export function ConsolePage() {
       }
     };
     initiateConnection();
+
+    return () => {
+      disconnectConversation();
+    };
   }, []);
 
   /**
@@ -259,6 +297,14 @@ export function ConsolePage() {
     const client = clientRef.current;
     const wavRecorder = wavRecorderRef.current;
     await wavRecorder.pause();
+
+    client.sendUserMessageContent([
+      {
+        type: 'input_text',
+        text: CUSTOM_INSTRUCTION,
+      },
+    ]);
+
     client.createResponse();
   };
 
@@ -465,49 +511,6 @@ export function ConsolePage() {
         return { ok: true };
       }
     );
-    client.addTool(
-      {
-        name: 'get_weather',
-        description:
-          'Retrieves the weather for a given lat, lng coordinate pair. Specify a label for the location.',
-        parameters: {
-          type: 'object',
-          properties: {
-            lat: {
-              type: 'number',
-              description: 'Latitude',
-            },
-            lng: {
-              type: 'number',
-              description: 'Longitude',
-            },
-            location: {
-              type: 'string',
-              description: 'Name of the location',
-            },
-          },
-          required: ['lat', 'lng', 'location'],
-        },
-      },
-      async ({ lat, lng, location }: { [key: string]: any }) => {
-        setMarker({ lat, lng, location });
-        setCoords({ lat, lng, location });
-        const result = await fetch(
-          `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lng}&current=temperature_2m,wind_speed_10m`
-        );
-        const json = await result.json();
-        const temperature = {
-          value: json.current.temperature_2m as number,
-          units: json.current_units.temperature_2m as string,
-        };
-        const wind_speed = {
-          value: json.current.wind_speed_10m as number,
-          units: json.current_units.wind_speed_10m as string,
-        };
-        setMarker({ lat, lng, location, temperature, wind_speed });
-        return json;
-      }
-    );
 
     // handle realtime events from client + server for event logging
     client.on('realtime.event', (realtimeEvent: RealtimeEvent) => {
@@ -573,7 +576,7 @@ export function ConsolePage() {
         </div>
         <div className="w-full">
           <div className="content-block conversation bg-[#F5F7FF] px-5 py-4 h-[100%]">
-            <div className="w-full" data-conversation-content>
+            <div className="w-full pb-10" data-conversation-content>
               {items.map((conversationItem, i) => {
                 return (
                   <div>
@@ -598,13 +601,20 @@ export function ConsolePage() {
 
                       {!conversationItem.formatted.tool &&
                         conversationItem.role === 'user' && (
-                          <div className="bg-[#fff] text-xs leading-tight font-regular text-[#212223] p-2 rounded-md w-[600px] ml-auto">
-                            {conversationItem.formatted.transcript ||
-                              (conversationItem.formatted.audio?.length
-                                ? '(awaiting transcript)'
-                                : conversationItem.formatted.text ||
-                                  '(item sent)')}
-                          </div>
+                          <>
+                            {conversationItem.formatted.text !==
+                              CUSTOM_INSTRUCTION &&
+                              conversationItem.formatted.text !==
+                                'START PLACEHOLDER' && (
+                                <div className="bg-[#fff] text-xs leading-tight font-regular text-[#212223] p-2 rounded-md w-[600px] ml-auto">
+                                  {conversationItem.formatted.transcript ||
+                                    (conversationItem.formatted.audio?.length
+                                      ? '(awaiting transcript)'
+                                      : conversationItem.formatted.text ||
+                                        '(item sent)')}
+                                </div>
+                              )}
+                          </>
                         )}
                       {!conversationItem.formatted.tool &&
                         conversationItem.role === 'assistant' && (
