@@ -27,6 +27,7 @@ import { useInstructions } from '../hooks/useInstructions';
 
 import './ConsolePage.scss';
 import { isJsxOpeningLikeElement } from 'typescript';
+import { useParams } from 'react-router-dom';
 
 /**
  * Type for result from get_weather() function call
@@ -285,21 +286,22 @@ export function ConsolePage() {
     }
   }, [realtimeEvents]);
 
-
-  const [instructionType, setInstructionType] = useState<string>('KSB6')
+  const { id: instructionTypeId } = useParams<{ id: string }>();
 
   // Set instructions
   useEffect(() => {
+    if (!instructionTypeId) return
+
     const client = clientRef.current
 
-    const { instructions } = useInstructions(instructionType)
+    const { instructions } = useInstructions(instructionTypeId)
 
     console.log('we are updating instructions: ', instructions)
 
     // Set instructions
     client.updateSession({ instructions: instructions });
 
-  }, [instructionType])
+  }, [instructionTypeId])
 
   /**
    * Auto-scroll the conversation logs
@@ -731,10 +733,6 @@ export function ConsolePage() {
               onClick={
                 isConnected ? disconnectConversation : connectConversation
               }
-            />
-            <Button
-              label={instructionType}
-              onClick={() => { setInstructionType(instructionType === 'KSB5' ? 'KSB6' : 'KSB5') }}
             />
           </div>
         </div>

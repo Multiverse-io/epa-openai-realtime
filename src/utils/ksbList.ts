@@ -13,12 +13,12 @@ const ksbList: KSBListItem[] = [
     definition: '',
     status: practiceStatus.notStarted,
   },
-  {
-    id: 'R1',
-    name: 'Open AI Realtime API',
-    definition: '',
-    status: practiceStatus.distinction,
-  },
+  // {
+  //   id: 'R1',
+  //   name: 'Open AI Realtime API',
+  //   definition: '',
+  //   status: practiceStatus.distinction,
+  // },
 ];
 
 export { ksbList };

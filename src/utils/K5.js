@@ -1,4 +1,4 @@
-export const KSB5instructions = `KSB5 focuses on structured and unstructured data. Some example questions you can ask about KSB5 are (randomly choose one of the questions as an example to ask.):
+export const K5instructions = `KSB5 focuses on structured and unstructured data. Some example questions you can ask about KSB5 are (randomly choose one of the questions as an example to ask.):
 Could you give a specific example from your work where you identified and distinguished between Structured and Unstructured data? How did your understanding of these concepts improve the data management process in this instance?
 Can you explain how the differences between Structured and Unstructured data impacted your strategy when handling a complex project? What factors did you need to consider regarding data organisation?
 Can you give an example of structured data from your organisation?
