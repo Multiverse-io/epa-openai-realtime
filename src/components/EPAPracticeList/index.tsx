@@ -7,6 +7,7 @@ import {
   SpeakerIcon,
   StarIcon,
 } from '@multiverse-io/stardust-react';
+import PortifolioBanner from '../PortifolioBanner';
 
 export enum practiceStatus {
   notStarted = 'not-started',
@@ -29,43 +30,48 @@ interface EPAPracticeListProps {
 
 const EPAPracticeList = ({ ksbList }: EPAPracticeListProps) => {
   return (
-    <div className="px-10 text-[#212223]">
-      <header className="pb-2">
-        <h2 className="text-m leading-tight font-medium">
-          Practice your interviews by KSB
-        </h2>
-      </header>
-
-      <div className="max-w-md">
-        <ul className="list-none p-0 m-0 flex gap-2 flex-col">
-          {ksbList.map((el) => {
-            return (
-              <li
-                key={el.id}
-                className="list-none p-0 m-0 flex items-center justify-between"
-              >
-                <span className="rounded-full border border-gray-100 shadow-sm py-1 px-2 text-s font-medium flex items-center justify-center gap-1">
-                  <RecordingIcon size="small" variant="action" />
-                  {el.name}
-                </span>
-                <div className="flex items-center gap-1 justify-items-end">
-                  <Button
-                    iconPosition="left"
-                    Icon={<SpeakerIcon size="small" variant="action" />}
-                    variant="tertiary"
-                    className="border border-[#4A5FF7]"
-                    size="small"
-                  >
-                    Start practicing
-                  </Button>
-                  <PracticeIcon status={el.status} />
-                </div>
-              </li>
-            );
-          })}
-        </ul>
+    <>
+      <div className="px-10 py-2 text-[#212223]">
+        <PortifolioBanner />
       </div>
-    </div>
+      <div className="px-10 text-[#212223]">
+        <header className="pb-2">
+          <h2 className="text-m leading-tight font-medium">
+            Practice your interviews by KSB
+          </h2>
+        </header>
+
+        <div className="max-w-md">
+          <ul className="list-none p-0 m-0 flex gap-2 flex-col">
+            {ksbList.map((el) => {
+              return (
+                <li
+                  key={el.id}
+                  className="list-none p-0 m-0 flex items-center justify-between"
+                >
+                  <span className="rounded-full border border-gray-100 shadow-sm py-1 px-2 text-s font-medium flex items-center justify-center gap-1">
+                    <RecordingIcon size="small" variant="action" />
+                    {el.name}
+                  </span>
+                  <div className="flex items-center gap-1 justify-items-end">
+                    <Button
+                      iconPosition="left"
+                      Icon={<SpeakerIcon size="small" variant="action" />}
+                      variant="tertiary"
+                      className="border border-[#4A5FF7]"
+                      size="small"
+                    >
+                      Start practicing
+                    </Button>
+                    <PracticeIcon status={el.status} />
+                  </div>
+                </li>
+              );
+            })}
+          </ul>
+        </div>
+      </div>
+    </>
   );
 };
 
