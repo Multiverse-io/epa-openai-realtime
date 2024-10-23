@@ -61,6 +61,7 @@ import {
 } from '@multiverse-io/stardust-react';
 import { useParams } from 'react-router-dom';
 import renderTextWithJsonList from '../utils/renderTextWithJsonList';
+import IntroScreen from '../components/IntroScreen';
 
 /**
  * Type for all event logs
@@ -171,22 +172,6 @@ export function ConsolePage() {
     if (client.getTurnDetectionType() === 'server_vad') {
       await wavRecorder.record((data) => client.appendInputAudio(data.mono));
     }
-  }, []);
-
-  // auto connect
-  useEffect(() => {
-    const initiateConnection = async () => {
-      try {
-        await connectConversation();
-      } catch (error) {
-        console.error('Failed to connect:', error);
-      }
-    };
-    initiateConnection();
-
-    return () => {
-      disconnectConversation();
-    };
   }, []);
 
   /**
@@ -516,7 +501,6 @@ export function ConsolePage() {
           <div className="mt-7">
             Appears in the following projects:
             <ul className="mt-2 list-disc px-2">
-              <li>Project 1</li>
               <li>Project 2</li>
             </ul>
           </div>
@@ -539,86 +523,94 @@ export function ConsolePage() {
           </div>
         </div>
         <div className="w-full">
-          <div className="content-block conversation bg-[#F5F7FF] px-5 py-4 h-[100%] overflow-y-scroll">
-            <div className="w-full pb-10" data-conversation-content>
-              {items.map((conversationItem, i) => {
-                return (
-                  <div>
-                    <div
-                      className="conversation-item"
-                      key={conversationItem.id}
-                    >
+          {!isConnected ? (
+            <IntroScreen
+              onClick={() => {
+                connectConversation();
+              }}
+            />
+          ) : (
+            <div className="content-block conversation bg-[#F5F7FF] px-5 py-4 h-[100%] overflow-y-scroll">
+              <div className="w-full pb-10" data-conversation-content>
+                {items.map((conversationItem, i) => {
+                  return (
+                    <div>
                       <div
-                        className="close"
-                        onClick={() =>
-                          deleteConversationItem(conversationItem.id)
-                        }
+                        className="conversation-item"
+                        key={conversationItem.id}
                       >
-                        <X />
+                        <div
+                          className="close"
+                          onClick={() =>
+                            deleteConversationItem(conversationItem.id)
+                          }
+                        >
+                          <X />
+                        </div>
+                      </div>
+                      <div className="flex w-full">
+                        {/* tool response */}
+                        {conversationItem.type === 'function_call_output' && (
+                          <div>{conversationItem.formatted.output}</div>
+                        )}
+
+                        {!conversationItem.formatted.tool &&
+                          conversationItem.role === 'user' && (
+                            <>
+                              {conversationItem.formatted.text !==
+                                CUSTOM_INSTRUCTION &&
+                                conversationItem.formatted.text !==
+                                  'START PLACEHOLDER' && (
+                                  <div className="bg-[#fff] text-xs leading-tight font-regular text-[#212223] p-2 rounded-md w-[600px] ml-auto">
+                                    {conversationItem.formatted.transcript ||
+                                      (conversationItem.formatted.audio?.length
+                                        ? '(awaiting transcript)'
+                                        : conversationItem.formatted.text ||
+                                          '(item sent)')}
+                                  </div>
+                                )}
+                            </>
+                          )}
+                        {!conversationItem.formatted.tool &&
+                          conversationItem.role === 'assistant' && (
+                            <div className="bg-[#E7EAFE] text-xs leading-tight font-regular text-[#212223] p-2 rounded-md w-[600px] mr-auto">
+                              {renderTextWithJsonList(
+                                conversationItem.formatted.transcript ||
+                                  conversationItem.formatted.text ||
+                                  '(truncated)'
+                              )}
+                            </div>
+                          )}
                       </div>
                     </div>
-                    <div className="flex w-full">
-                      {/* tool response */}
-                      {conversationItem.type === 'function_call_output' && (
-                        <div>{conversationItem.formatted.output}</div>
+                  );
+                })}
+              </div>
+              <div className="fixed bottom-5 mx-auto left-[55%]">
+                {isConnected && canPushToTalk && (
+                  <div className="flex flex-col gap-1 w-[200px] items-center">
+                    <button
+                      className={`mx-auto rounded-full ${
+                        isRecording ? 'bg-[#3848BB]' : 'bg-[#4A5FF7]'
+                      } p-2 shadow-md`}
+                      disabled={!isConnected || !canPushToTalk}
+                      onMouseDown={startRecording}
+                      onMouseUp={stopRecording}
+                    >
+                      {isRecording ? (
+                        <PauseIcon variant="white" />
+                      ) : (
+                        <PlayIcon variant="white" />
                       )}
-
-                      {!conversationItem.formatted.tool &&
-                        conversationItem.role === 'user' && (
-                          <>
-                            {conversationItem.formatted.text !==
-                              CUSTOM_INSTRUCTION &&
-                              conversationItem.formatted.text !==
-                                'START PLACEHOLDER' && (
-                                <div className="bg-[#fff] text-xs leading-tight font-regular text-[#212223] p-2 rounded-md w-[600px] ml-auto">
-                                  {conversationItem.formatted.transcript ||
-                                    (conversationItem.formatted.audio?.length
-                                      ? '(awaiting transcript)'
-                                      : conversationItem.formatted.text ||
-                                        '(item sent)')}
-                                </div>
-                              )}
-                          </>
-                        )}
-                      {!conversationItem.formatted.tool &&
-                        conversationItem.role === 'assistant' && (
-                          <div className="bg-[#E7EAFE] text-xs leading-tight font-regular text-[#212223] p-2 rounded-md w-[600px] mr-auto">
-                            {renderTextWithJsonList(
-                              conversationItem.formatted.transcript ||
-                                conversationItem.formatted.text ||
-                                '(truncated)'
-                            )}
-                          </div>
-                        )}
-                    </div>
+                    </button>
+                    <span className="text-xxs leading-tight font-medium text-[#6F7171]">
+                      {isRecording ? 'Stop recording' : 'Record your response'}
+                    </span>
                   </div>
-                );
-              })}
+                )}
+              </div>
             </div>
-            <div className="fixed bottom-5 mx-auto left-[55%]">
-              {isConnected && canPushToTalk && (
-                <div className="flex flex-col gap-1 w-[200px] items-center">
-                  <button
-                    className={`mx-auto rounded-full ${
-                      isRecording ? 'bg-[#3848BB]' : 'bg-[#4A5FF7]'
-                    } p-2 shadow-md`}
-                    disabled={!isConnected || !canPushToTalk}
-                    onMouseDown={startRecording}
-                    onMouseUp={stopRecording}
-                  >
-                    {isRecording ? (
-                      <PauseIcon variant="white" />
-                    ) : (
-                      <PlayIcon variant="white" />
-                    )}
-                  </button>
-                  <span className="text-xxs leading-tight font-medium text-[#6F7171]">
-                    {isRecording ? 'Stop recording' : 'Record your response'}
-                  </span>
-                </div>
-              )}
-            </div>
-          </div>
+          )}
         </div>
       </div>
     </div>
