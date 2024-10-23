@@ -539,7 +539,7 @@ export function ConsolePage() {
           </div>
         </div>
         <div className="w-full">
-          <div className="content-block conversation bg-[#F5F7FF] px-5 py-4 h-[100%]">
+          <div className="content-block conversation bg-[#F5F7FF] px-5 py-4 h-[100%] overflow-y-scroll">
             <div className="w-full pb-10" data-conversation-content>
               {items.map((conversationItem, i) => {
                 return (
