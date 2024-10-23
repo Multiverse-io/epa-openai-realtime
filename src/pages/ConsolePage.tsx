@@ -54,6 +54,7 @@ import { useInstructions } from '../hooks/useInstructions';
 
 import './ConsolePage.scss';
 import {
+  Button,
   PauseIcon,
   PlayIcon,
   RecordingIcon,
@@ -114,6 +115,7 @@ export function ConsolePage() {
    * - Autoscrolling event logs
    * - Timing delta for event log displays
    */
+
   const clientCanvasRef = useRef<HTMLCanvasElement>(null);
   const serverCanvasRef = useRef<HTMLCanvasElement>(null);
   const eventsScrollHeightRef = useRef(0);
@@ -491,6 +493,10 @@ export function ConsolePage() {
     };
   }, []);
 
+  const handleExit = () => {
+    disconnectConversation();
+  };
+
   /**
    * Render the application
    */
@@ -507,11 +513,29 @@ export function ConsolePage() {
               {instructionTypeId}
             </span>
           </div>
-          <div className="mb-3">
-            <span className="rounded-full border border-gray-100 shadow-sm py-1 px-2 text-s font-medium flex items-center justify-center gap-1 w-fit">
-              Appears in the following projects:
-              {instructionTypeId}
-            </span>
+          <div className="mt-7">
+            Appears in the following projects:
+            <ul className="mt-2 list-disc px-2">
+              <li>Project 1</li>
+              <li>Project 2</li>
+            </ul>
+          </div>
+
+          <div className="mt-5">
+            Questions you've practiced: <strong>1</strong>/5
+          </div>
+
+          <div className="gap-1 flex mt-5 flex-col">
+            <Button variant="secondary" size="small">
+              Download transcript
+            </Button>
+            <Button
+              variant="secondary"
+              size="small"
+              onClick={() => handleExit()}
+            >
+              Exit
+            </Button>
           </div>
         </div>
         <div className="w-full">
