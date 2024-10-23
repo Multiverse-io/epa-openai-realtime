@@ -13,7 +13,7 @@ interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
 }
 
 export function Button({
-  label = 'Okay',
+  label = 'Ok',
   icon = void 0,
   iconPosition = 'start',
   iconColor = void 0,
