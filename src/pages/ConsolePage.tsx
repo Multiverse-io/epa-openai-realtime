@@ -14,7 +14,7 @@ const CUSTOM_INSTRUCTION = `
   Give me an overall score of the response, tell me if I passed all of the criteria, if I did, say that I passed, otherwise Not Passed.
   Go over the criteria 1, 2, 3, 4, and give back a JSON in the following format for each one of them:
 
-  [{
+ \`\`\`json [{
     criterionName: string,
     passed: Boolean,
     reasoning: string,
@@ -33,7 +33,7 @@ const CUSTOM_INSTRUCTION = `
     criterionName: string,
     passed: Boolean,
     reasoning: string,
-  }]
+  }]\`\`\`
 
   Do not give me back the criteria responses outside the JSON.
 `;
@@ -404,34 +404,6 @@ export function ConsolePage() {
         return { ok: true };
       }
     );
-    client.addTool(
-      {
-        name: 'sets_pass_or_fail_after_every_apprentice_answer',
-        description:
-          'Saves whether user passes or fails KSB based on their response.',
-        parameters: {
-          type: 'object',
-          // tool_choice: "required",
-          properties: {
-            key: {
-              type: 'string',
-              description:
-                'The key of the pass or fail value. Always use lowercase and underscores, no other characters.',
-            },
-            value: {
-              type: 'string',
-              description: 'Value can either be pass or fail',
-            },
-          },
-          required: ['key', 'value'],
-        },
-      },
-      async ({ key, value }: { [key: string]: any }) => {
-        console.log('get hre');
-        localStorage.setItem(key, value);
-        return { ok: true };
-      }
-    );
 
     // handle realtime events from client + server for event logging
     client.on('realtime.event', (realtimeEvent: RealtimeEvent) => {
@@ -577,7 +549,7 @@ export function ConsolePage() {
                               {renderTextWithJsonList(
                                 conversationItem.formatted.transcript ||
                                   conversationItem.formatted.text ||
-                                  '(truncated)'
+                                  'See transcript'
                               )}
                             </div>
                           )}
