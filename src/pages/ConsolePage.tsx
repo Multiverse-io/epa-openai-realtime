@@ -429,6 +429,33 @@ export function ConsolePage() {
     );
     client.addTool(
       {
+        name: 'sets_pass_or_fail_after_every_apprentice_answer',
+        description: 'Saves whether user passes or fails KSB based on their response.',
+        parameters: {
+          type: 'object',
+          // tool_choice: "required",
+          properties: {
+            key: {
+              type: 'string',
+              description:
+                'The key of the pass or fail value. Always use lowercase and underscores, no other characters.',
+            },
+            value: {
+              type: 'string',
+              description: 'Value can either be pass or fail',
+            },
+          },
+          required: ['key', 'value'],
+        },
+      },
+      async ({ key, value }: { [key: string]: any }) => {
+        console.log('get hre');
+        localStorage.setItem(key, value)
+        return { ok: true };
+      }
+    );
+    client.addTool(
+      {
         name: 'get_weather',
         description:
           'Retrieves the weather for a given lat, lng coordinate pair. Specify a label for the location.',
